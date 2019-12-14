@@ -1,1 +1,1 @@
-{ Type = ../types/Service.dhall, defaults = ../defaults/Service.dhall }
+{ Type = ../types/Service.dhall, default = ../defaults/Service.dhall }

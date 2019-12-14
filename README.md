@@ -1,2 +1,2 @@
 # dhall-operator
-Abstract applications operator
+**WIP** Abstract applications operator

@@ -1,1 +1,1 @@
-{ Podman = ./deploy/Podman.dhall }
+{ Kubernetes = ./deploy/Kubernetes.dhall, Podman = ./deploy/Podman.dhall }

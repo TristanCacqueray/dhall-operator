@@ -1,5 +1,7 @@
 { name : Text
-, image : Text
 , type : ./ServiceType.dhall
-, command : Optional (List Text)
+, privileged : Bool
+, ports : Optional (List ./Port.dhall)
+, container : ./Container.dhall
+, init-containers : Optional (List ./Container.dhall)
 }
