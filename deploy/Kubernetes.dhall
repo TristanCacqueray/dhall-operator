@@ -179,11 +179,45 @@ let renderResources =
 
           let mkServicePod =
                     \(service : Service)
-                ->  Kubernetes.PodSpec::{
-                    , volumes = mkServiceVolume (app.volumes service.type)
-                    , containers =
-                        [ mkServiceContainer service service.container ]
-                    }
+                ->  let IndexedContainer
+                        : Type
+                        = { index : Natural, value : ../types/Container.dhall }
+
+                    in  Kubernetes.PodSpec::{
+                        , volumes = mkServiceVolume (app.volumes service.type)
+                        , containers =
+                            [ mkServiceContainer service service.container ]
+                        , initContainers =
+                            Prelude.List.map
+                              IndexedContainer
+                              Kubernetes.Container.Type
+                              (     \(indexed-container : IndexedContainer)
+                                ->  mkServiceContainer
+                                      (     service
+                                        //  { name =
+                                                    service.name
+                                                ++  "-init"
+                                                ++  Natural/show
+                                                      indexed-container.index
+                                            }
+                                      )
+                                      indexed-container.value
+                              )
+                              ( Prelude.List.indexed
+                                  ../types/Container.dhall
+                                  ( Optional/fold
+                                      (List ../types/Container.dhall)
+                                      service.init-containers
+                                      (List ../types/Container.dhall)
+                                      (     \ ( some
+                                              : List ../types/Container.dhall
+                                              )
+                                        ->  some
+                                      )
+                                      ([] : List ../types/Container.dhall)
+                                  )
+                              )
+                        }
 
           let mkServicePodTemplate =
                     \(service : Service)
