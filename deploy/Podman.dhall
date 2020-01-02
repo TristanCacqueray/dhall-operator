@@ -122,8 +122,15 @@ let renderCommands
 
           let setPort =
                     \(port : ../types/Port.dhall)
-                ->      "--publish ${Natural/show port.host}:"
-                    ++  "${Natural/show port.container}"
+                ->  Prelude.Optional.fold
+                      Natural
+                      port.host
+                      Text
+                      (     \(port-host : Natural)
+                        ->      "--publish ${Natural/show port-host}:"
+                            ++  "${Natural/show port.container}"
+                      )
+                      ""
 
           let getPort
               : forall (service : ../types/Service.dhall) -> List Text

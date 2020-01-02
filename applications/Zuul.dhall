@@ -2,6 +2,8 @@ let Container = ../schemas/Container.dhall
 
 let Service = ../schemas/Service.dhall
 
+let Port = ../schemas/Port.dhall
+
 let ServiceType = ../types/ServiceType.dhall
 
 let org = "quay.io/software-factory"
@@ -37,16 +39,19 @@ let {- the list of zuul services -} control-plane-services =
       ->  [ Service::{
             , name = "zk"
             , container = Container::{ image = zk-image }
+            , ports = Some [ Port::{ container = 2181 } ]
             }
           , Service::{
             , name = "db"
             , type = ServiceType.Database
+            , ports = Some [ Port::{ container = 5432 } ]
             , container =
                 Container::{ image = "docker.io/library/postgres:12.1" }
             }
           , Service::{
             , name = "config"
             , type = ServiceType.Config
+            , ports = Some [ Port::{ container = 9418 } ]
             , container =
                 { image = zuul-base
                 , command =
@@ -66,6 +71,7 @@ let {- the list of zuul services -} control-plane-services =
           , Service::{
             , name = "scheduler"
             , type = ServiceType.Scheduler
+            , ports = Some [ Port::{ container = 4730 } ]
             , init-containers =
                 Some
                   [ { image = zuul-base
@@ -96,6 +102,7 @@ let {- the list of zuul services -} control-plane-services =
             , name = "executor"
             , type = ServiceType.Executor
             , privileged = True
+            , ports = Some [ Port::{ container = 7900 } ]
             , init-containers =
                 Some
                   [ { image = zuul-base
@@ -110,7 +117,7 @@ let {- the list of zuul services -} control-plane-services =
           , Service::{
             , name = "web"
             , type = ServiceType.Gateway
-            , ports = Some [ { host = port, container = 9000 } ]
+            , ports = Some [ Port::{ host = Some port, container = 9000 } ]
             , init-containers =
                 Some
                   [ { image = zuul-base

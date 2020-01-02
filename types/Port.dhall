@@ -1,1 +1,1 @@
-{ host : Natural, container : Natural }
+{ host : Optional Natural, container : Natural }
