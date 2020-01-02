@@ -141,6 +141,17 @@ let renderResources =
                       )
                       ([] : List Kubernetes.ContainerPort.Type)
 
+          let mkContainerEnv =
+                Prelude.List.map
+                  ../types/Env.dhall
+                  Kubernetes.EnvVar.Type
+                  (     \(env : ../types/Env.dhall)
+                    ->  Kubernetes.EnvVar::{
+                        , name = env.mapKey
+                        , value = Some env.mapValue
+                        }
+                  )
+
           let mkServiceContainer =
                     \(service : ../types/Service.dhall)
                 ->  \(container : ../types/Container.dhall)
@@ -149,6 +160,7 @@ let renderResources =
                     , image = Some container.image
                     , ports = mkContainerPorts service
                     , args = ../functions/getCommand.dhall container
+                    , env = mkContainerEnv (app.environs service.type)
                     , volumeMounts =
                         mkContainerVolume (app.volumes service.type)
                     }
