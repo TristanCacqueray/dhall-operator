@@ -28,6 +28,10 @@ let renderResources =
                         }
                       ]
 
+          let service-name =
+                    \(service-name : Text)
+                ->  app.name ++ "-service-" ++ service-name
+
           let mkServicePort =
                     \(port : Port)
                 ->  Kubernetes.ServicePort::{
@@ -45,7 +49,7 @@ let renderResources =
                     in  Kubernetes.Service::{
                         , metadata =
                             Kubernetes.ObjectMeta::{
-                            , name = app.name ++ "-service-" ++ service.name
+                            , name = service-name service.name
                             , labels = labels
                             }
                         , spec =
@@ -250,6 +254,77 @@ let renderResources =
                               }
                         }
 
+          let {- the list of port that have an host attribute -} ingress-ports
+              : forall (service : Service) -> List Natural
+              =     \(service : Service)
+                ->  Prelude.List.map
+                      Port
+                      Natural
+                      (     \(port : Port)
+                        ->  Optional/fold
+                              Natural
+                              port.host
+                              Natural
+                              (\(host : Natural) -> host)
+                              42
+                      )
+                      ( Prelude.List.filter
+                          Port
+                          (     \(port : Port)
+                            ->  False == Prelude.Optional.null Natural port.host
+                          )
+                          ( Optional/fold
+                              (List Port)
+                              service.ports
+                              (List Port)
+                              (\(some : List Port) -> some)
+                              ([] : List Port)
+                          )
+                      )
+
+          let mkIngress =
+                    \(service : Service)
+                ->  let labels = service-label service.name
+
+                    let {- TODO: support more than one ingress per service
+                        -} port =
+                          Optional/fold
+                            Natural
+                            (Prelude.List.head Natural (ingress-ports service))
+                            Natural
+                            (\(some : Natural) -> some)
+                            42
+
+                    in  Kubernetes.Ingress::{
+                        , metadata = mkServiceMetadata service labels
+                        , spec =
+                            Some
+                              Kubernetes.IngressSpec::{
+                              , rules =
+                                  [ Kubernetes.IngressRule::{
+                                    , http =
+                                        Some
+                                          Kubernetes.HTTPIngressRuleValue::{
+                                          , paths =
+                                              [ Kubernetes.HTTPIngressPath::{
+                                                , backend =
+                                                    Kubernetes.IngressBackend::{
+                                                    , serviceName =
+                                                        service-name
+                                                          service.name
+                                                    , servicePort =
+                                                        Kubernetes.IntOrString.Int
+                                                          port
+                                                    }
+                                                , path = Some "/"
+                                                }
+                                              ]
+                                          }
+                                    }
+                                  ]
+                              }
+                        }
+
           let secrets = mkSecret (app.volumes ServiceType._All)
 
           let isStateful =
@@ -262,6 +337,14 @@ let renderResources =
                       False
 
           let notStateful = \(service : Service) -> isStateful service == False
+
+          let services-with-port =
+                Prelude.List.filter
+                  Service
+                  (     \(service : Service)
+                    ->  False == Prelude.Optional.null (List Port) service.ports
+                  )
+                  app.services
 
           let deployments =
                 Prelude.List.map
@@ -282,11 +365,22 @@ let renderResources =
                   Service
                   Kubernetes.Service.Type
                   mkService
+                  services-with-port
+
+          let ingresses =
+                Prelude.List.map
+                  Service
+                  Kubernetes.Ingress.Type
+                  mkIngress
                   ( Prelude.List.filter
                       Service
                       (     \(service : Service)
                         ->      False
-                            ==  Prelude.Optional.null (List Port) service.ports
+                            ==  Prelude.Natural.isZero
+                                  ( Prelude.List.length
+                                      Natural
+                                      (ingress-ports service)
+                                  )
                       )
                       app.services
                   )
@@ -319,10 +413,18 @@ let renderResources =
                   (\(cm : Kubernetes.Deployment.Type) -> k8s.Deployment cm)
                   deployments
 
+          let transformIngresses =
+                Prelude.List.map
+                  Kubernetes.Ingress.Type
+                  k8s
+                  (\(cm : Kubernetes.Ingress.Type) -> k8s.Ingress cm)
+                  ingresses
+
           in    transformSecrets
               # transformServices
               # transformDeployments
               # transformStatefulset
+              # transformIngresses
 
 in      \(app : ../types/Application.dhall)
     ->  { apiVersion = "v1", kind = "List", items = renderResources app }
