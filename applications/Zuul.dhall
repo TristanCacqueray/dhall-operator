@@ -255,7 +255,10 @@ let {- the service confs -} control-plane-config =
                 }
 
           let config-repo =
-                { name = "config", dir = "/config", files = zuul-config-files }
+                { name = "config"
+                , dir = "/config/config"
+                , files = zuul-config-files
+                }
 
           let empty = [] : List ../types/Volume.dhall
 
@@ -312,7 +315,7 @@ let {- An example cluster that just runs a job every minute...
           let executor-key = ./data/id_rsa as Text
 
           let zuul-config =
-                [ { path = "config/zuul.yaml"
+                [ { path = "zuul.yaml"
                   , content =
                       ''
                       - pipeline:
@@ -340,7 +343,7 @@ let {- An example cluster that just runs a job every minute...
                               - test-job
                       ''
                   }
-                , { path = "config/base.yaml"
+                , { path = "base.yaml"
                   , content =
                       ''
                       - hosts: localhost
