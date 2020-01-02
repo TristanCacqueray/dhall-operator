@@ -63,38 +63,43 @@ let renderResources =
 
           let mkService =
                     \(service : Service)
-                ->  Kubernetes.Deployment::{
-                    , metadata = Kubernetes.ObjectMeta::{ name = service.name }
-                    , spec =
-                        Some
-                          Kubernetes.DeploymentSpec::{
-                          , replicas = Some 1
-                          , selector =
-                              Kubernetes.LabelSelector::{
-                              , matchLabels = toMap { run = service.name }
-                              }
-                          , template =
-                              Kubernetes.PodTemplateSpec::{
-                              , metadata =
-                                  Kubernetes.ObjectMeta::{
-                                  , name = service.name
-                                  , labels = toMap { run = service.name }
+                ->  let label = toMap { run = service.name }
+
+                    in  Kubernetes.Deployment::{
+                        , metadata =
+                            Kubernetes.ObjectMeta::{
+                            , name = app.name ++ "-" ++ service.name
+                            }
+                        , spec =
+                            Some
+                              Kubernetes.DeploymentSpec::{
+                              , replicas = Some 1
+                              , selector =
+                                  Kubernetes.LabelSelector::{
+                                  , matchLabels = label
                                   }
-                              , spec =
-                                  Some
-                                    Kubernetes.PodSpec::{
-                                    , volumes =
-                                        mkServiceVolume
-                                          (app.volumes service.type)
-                                    , containers =
-                                        [ mkServiceContainer
-                                            service
-                                            service.container
-                                        ]
-                                    }
+                              , template =
+                                  Kubernetes.PodTemplateSpec::{
+                                  , metadata =
+                                      Kubernetes.ObjectMeta::{
+                                      , name = service.name
+                                      , labels = label
+                                      }
+                                  , spec =
+                                      Some
+                                        Kubernetes.PodSpec::{
+                                        , volumes =
+                                            mkServiceVolume
+                                              (app.volumes service.type)
+                                        , containers =
+                                            [ mkServiceContainer
+                                                service
+                                                service.container
+                                            ]
+                                        }
+                                  }
                               }
-                          }
-                    }
+                        }
 
           let configMaps = mkConfigMap (app.volumes ServiceType._All)
 
