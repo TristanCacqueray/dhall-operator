@@ -27,7 +27,10 @@ let waitFor =
 
           let debug = "waiting for ${hostname}:${Natural/show port}"
 
-          in  [ "sh", "-c", "until ${test}; do echo '${debug}'; sleep 1; done" ]
+          in  [ "sh"
+              , "-c"
+              , "until ${test} 2>/dev/null; do echo '${debug}'; sleep 1; done"
+              ]
 
 let {- the list of zuul services -} control-plane-services =
           \(port : Natural)
