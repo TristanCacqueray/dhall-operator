@@ -39,12 +39,14 @@ let {- the list of zuul services -} control-plane-services =
       ->  [ Service::{
             , name = "zk"
             , container = Container::{ image = zk-image }
+            , volume-size = Some 1
             , ports = Some [ Port::{ container = 2181, name = "zk" } ]
             }
           , Service::{
             , name = "db"
             , type = ServiceType.Database
             , ports = Some [ Port::{ container = 5432, name = "pg" } ]
+            , volume-size = Some 1
             , container =
                 Container::{ image = "docker.io/library/postgres:12.1" }
             }
@@ -72,6 +74,7 @@ let {- the list of zuul services -} control-plane-services =
             , name = "scheduler"
             , type = ServiceType.Scheduler
             , ports = Some [ Port::{ container = 4730, name = "gearman" } ]
+            , volume-size = Some 5
             , init-containers =
                 Some
                   [ { image = zuul-base
@@ -101,6 +104,7 @@ let {- the list of zuul services -} control-plane-services =
           , Service::{
             , name = "executor"
             , type = ServiceType.Executor
+            , volume-size = Some 0
             , privileged = True
             , ports = Some [ Port::{ container = 7900, name = "finger" } ]
             , init-containers =
