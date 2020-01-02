@@ -70,7 +70,9 @@ let renderResources =
                   (     \(volume : ../types/Volume.dhall)
                     ->  Kubernetes.Secret::{
                         , metadata =
-                            Kubernetes.ObjectMeta::{ name = volume.name }
+                            Kubernetes.ObjectMeta::{
+                            , name = app.name ++ "-secret-" ++ volume.name
+                            }
                         , stringData =
                             Prelude.List.map
                               ../types/File.dhall
@@ -89,7 +91,16 @@ let renderResources =
                   ../types/Volume.dhall
                   Kubernetes.Volume.Type
                   (     \(volume : ../types/Volume.dhall)
-                    ->  Kubernetes.Volume::{ name = volume.name }
+                    ->  Kubernetes.Volume::{
+                        , name = volume.name
+                        , secret =
+                            Some
+                              Kubernetes.SecretVolumeSource::{
+                              , secretName =
+                                  Some (app.name ++ "-secret-" ++ volume.name)
+                              , defaultMode = Some 256
+                              }
+                        }
                   )
 
           let mkContainerVolume =
