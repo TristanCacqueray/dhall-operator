@@ -10,15 +10,15 @@ let ServiceType = ../types/ServiceType.dhall
 
 let renderResources =
           \(app : ../types/Application.dhall)
-      ->  let mkConfigMap =
+      ->  let mkSecret =
                 Prelude.List.map
                   ../types/Volume.dhall
-                  Kubernetes.ConfigMap.Type
+                  Kubernetes.Secret.Type
                   (     \(volume : ../types/Volume.dhall)
-                    ->  Kubernetes.ConfigMap::{
+                    ->  Kubernetes.Secret::{
                         , metadata =
                             Kubernetes.ObjectMeta::{ name = volume.name }
-                        , data =
+                        , stringData =
                             Prelude.List.map
                               ../types/File.dhall
                               { mapKey : Text, mapValue : Text }
@@ -101,7 +101,7 @@ let renderResources =
                               }
                         }
 
-          let configMaps = mkConfigMap (app.volumes ServiceType._All)
+          let secrets = mkSecret (app.volumes ServiceType._All)
 
           let deployments =
                 Prelude.List.map
@@ -110,12 +110,12 @@ let renderResources =
                   mkService
                   app.services
 
-          let transformConfigMaps =
+          let transformSecrets =
                 Prelude.List.map
-                  Kubernetes.ConfigMap.Type
+                  Kubernetes.Secret.Type
                   k8s
-                  (\(cm : Kubernetes.ConfigMap.Type) -> k8s.ConfigMap cm)
-                  configMaps
+                  (\(cm : Kubernetes.Secret.Type) -> k8s.Secret cm)
+                  secrets
 
           let transformDeployments =
                 Prelude.List.map
@@ -124,7 +124,7 @@ let renderResources =
                   (\(cm : Kubernetes.Deployment.Type) -> k8s.Deployment cm)
                   deployments
 
-          in  transformConfigMaps # transformDeployments
+          in  transformSecrets # transformDeployments
 
 in      \(app : ../types/Application.dhall)
     ->  { apiVersion = "v1", kind = "List", items = renderResources app }
