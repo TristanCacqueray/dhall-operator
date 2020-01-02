@@ -4,6 +4,8 @@ let Kubernetes = ../Kubernetes.dhall
 
 let k8s = ./kubernetes-types-union.dhall
 
+let Port = ../types/Port.dhall
+
 let Service = ../types/Service.dhall
 
 let ServiceType = ../types/ServiceType.dhall
@@ -21,6 +23,16 @@ let renderResources =
                         }
                       ]
 
+          let mkServicePort =
+                    \(port : Port)
+                ->  Kubernetes.ServicePort::{
+                    , name = Some port.name
+                    , protocol = Some port.protocol
+                    , targetPort =
+                        Some (Kubernetes.IntOrString.String port.name)
+                    , port = port.container
+                    }
+
           let mkService =
                     \(service : Service)
                 ->  let labels = service-label service.name
@@ -36,6 +48,18 @@ let renderResources =
                               Kubernetes.ServiceSpec::{
                               , type = Some "ClusterIP"
                               , selector = labels
+                              , ports =
+                                  Prelude.List.map
+                                    Port
+                                    Kubernetes.ServicePort.Type
+                                    mkServicePort
+                                    ( Prelude.Optional.fold
+                                        (List Port)
+                                        service.ports
+                                        (List Port)
+                                        (\(some : List Port) -> some)
+                                        ([] : List Port)
+                                    )
                               }
                         }
 
@@ -148,9 +172,7 @@ let renderResources =
                       Service
                       (     \(service : Service)
                         ->      False
-                            ==  Prelude.Optional.null
-                                  (List ../types/Port.dhall)
-                                  service.ports
+                            ==  Prelude.Optional.null (List Port) service.ports
                       )
                       app.services
                   )
