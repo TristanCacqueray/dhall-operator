@@ -10,7 +10,36 @@ let ServiceType = ../types/ServiceType.dhall
 
 let renderResources =
           \(app : ../types/Application.dhall)
-      ->  let mkSecret =
+      ->  let app-labels =
+                [ { mapKey = "app.kubernetes.io/name", mapValue = app.name } ]
+
+          let service-label =
+                    \(service-name : Text)
+                ->    app-labels
+                    # [ { mapKey = "app.kubernetes.io/component"
+                        , mapValue = service-name
+                        }
+                      ]
+
+          let mkService =
+                    \(service : Service)
+                ->  let labels = service-label service.name
+
+                    in  Kubernetes.Service::{
+                        , metadata =
+                            Kubernetes.ObjectMeta::{
+                            , name = service.name ++ "-service"
+                            , labels = labels
+                            }
+                        , spec =
+                            Some
+                              Kubernetes.ServiceSpec::{
+                              , type = Some "ClusterIP"
+                              , selector = labels
+                              }
+                        }
+
+          let mkSecret =
                 Prelude.List.map
                   ../types/Volume.dhall
                   Kubernetes.Secret.Type
@@ -61,7 +90,7 @@ let renderResources =
                         mkContainerVolume (app.volumes service.type)
                     }
 
-          let mkService =
+          let mkDeployment =
                     \(service : Service)
                 ->  let label = toMap { run = service.name }
 
@@ -107,8 +136,24 @@ let renderResources =
                 Prelude.List.map
                   Service
                   Kubernetes.Deployment.Type
-                  mkService
+                  mkDeployment
                   app.services
+
+          let services =
+                Prelude.List.map
+                  Service
+                  Kubernetes.Service.Type
+                  mkService
+                  ( Prelude.List.filter
+                      Service
+                      (     \(service : Service)
+                        ->      False
+                            ==  Prelude.Optional.null
+                                  (List ../types/Port.dhall)
+                                  service.ports
+                      )
+                      app.services
+                  )
 
           let transformSecrets =
                 Prelude.List.map
@@ -117,6 +162,13 @@ let renderResources =
                   (\(cm : Kubernetes.Secret.Type) -> k8s.Secret cm)
                   secrets
 
+          let transformServices =
+                Prelude.List.map
+                  Kubernetes.Service.Type
+                  k8s
+                  (\(cm : Kubernetes.Service.Type) -> k8s.Service cm)
+                  services
+
           let transformDeployments =
                 Prelude.List.map
                   Kubernetes.Deployment.Type
@@ -124,7 +176,7 @@ let renderResources =
                   (\(cm : Kubernetes.Deployment.Type) -> k8s.Deployment cm)
                   deployments
 
-          in  transformSecrets # transformDeployments
+          in  transformSecrets # transformServices # transformDeployments
 
 in      \(app : ../types/Application.dhall)
     ->  { apiVersion = "v1", kind = "List", items = renderResources app }
