@@ -98,7 +98,7 @@ let renderCommands
                             # setVolume (app.volumes service.type)
                             # setEnv (app.environs service.type)
                             # [ "--rm", container.image ]
-                            # ../functions/getCommand.dhall container
+                            # ../functions/getCommandQuoted.dhall container
                           )
 
           let serviceCommandsInit =

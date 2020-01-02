@@ -5,11 +5,7 @@ let getCommand
             (List Text)
             container.command
             (List Text)
-            ( (../Prelude.dhall).List.map
-                Text
-                Text
-                (\(some : Text) -> "\"" ++ some ++ "\"")
-            )
+            (\(some : List Text) -> some)
             ([] : List Text)
 
 in  getCommand
