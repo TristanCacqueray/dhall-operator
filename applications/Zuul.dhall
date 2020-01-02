@@ -364,6 +364,7 @@ let {- An example cluster that just runs a job every minute...
                 ]
 
           in    { name = name
+                , kind = "zuul"
                 , services = control-plane-services port
                 , environs = control-plane-environ db-password
                 , volumes =

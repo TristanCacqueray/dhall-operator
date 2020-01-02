@@ -13,7 +13,10 @@ let ServiceType = ../types/ServiceType.dhall
 let renderResources =
           \(app : ../types/Application.dhall)
       ->  let app-labels =
-                [ { mapKey = "app.kubernetes.io/name", mapValue = app.name } ]
+                [ { mapKey = "app.kubernetes.io/name", mapValue = app.name }
+                , { mapKey = "app.kubernetes.io/instance", mapValue = app.name }
+                , { mapKey = "app.kubernetes.io/part-of", mapValue = app.kind }
+                ]
 
           let service-label =
                     \(service-name : Text)
