@@ -40,7 +40,7 @@ let renderResources =
                     in  Kubernetes.Service::{
                         , metadata =
                             Kubernetes.ObjectMeta::{
-                            , name = service.name ++ "-service"
+                            , name = app.name ++ "-service-" ++ service.name
                             , labels = labels
                             }
                         , spec =
@@ -116,12 +116,13 @@ let renderResources =
 
           let mkDeployment =
                     \(service : Service)
-                ->  let label = toMap { run = service.name }
+                ->  let labels = service-label service.name
 
                     in  Kubernetes.Deployment::{
                         , metadata =
                             Kubernetes.ObjectMeta::{
                             , name = app.name ++ "-" ++ service.name
+                            , labels = labels
                             }
                         , spec =
                             Some
@@ -129,14 +130,14 @@ let renderResources =
                               , replicas = Some 1
                               , selector =
                                   Kubernetes.LabelSelector::{
-                                  , matchLabels = label
+                                  , matchLabels = labels
                                   }
                               , template =
                                   Kubernetes.PodTemplateSpec::{
                                   , metadata =
                                       Kubernetes.ObjectMeta::{
                                       , name = service.name
-                                      , labels = label
+                                      , labels = labels
                                       }
                                   , spec =
                                       Some
