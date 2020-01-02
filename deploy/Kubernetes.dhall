@@ -114,12 +114,31 @@ let renderResources =
                         }
                   )
 
+          let mkContainerPorts =
+                    \(service : Service)
+                ->  Prelude.Optional.fold
+                      (List Port)
+                      service.ports
+                      (List Kubernetes.ContainerPort.Type)
+                      ( Prelude.List.map
+                          Port
+                          Kubernetes.ContainerPort.Type
+                          (     \(port : Port)
+                            ->  Kubernetes.ContainerPort::{
+                                , name = Some port.name
+                                , containerPort = port.container
+                                }
+                          )
+                      )
+                      ([] : List Kubernetes.ContainerPort.Type)
+
           let mkServiceContainer =
                     \(service : ../types/Service.dhall)
                 ->  \(container : ../types/Container.dhall)
                 ->  Kubernetes.Container::{
                     , name = service.name
                     , image = Some container.image
+                    , ports = mkContainerPorts service
                     , args = ../functions/getCommand.dhall container
                     , volumeMounts =
                         mkContainerVolume (app.volumes service.type)
