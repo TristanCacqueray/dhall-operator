@@ -23,9 +23,9 @@ let waitFor =
       ->  \(port : Natural)
       ->  let test =
                     "python -c '"
-                ++  "import socket; "
+                ++  "import socket, sys; "
                 ++  "socket.socket(socket.AF_INET, socket.SOCK_STREAM)"
-                ++  ".connect((\\\"${hostname}\\\", ${Natural/show port}))'"
+                ++  ".connect((sys.argv[1], ${Natural/show port}))' ${hostname}"
 
           let debug = "waiting for ${hostname}:${Natural/show port}"
 
