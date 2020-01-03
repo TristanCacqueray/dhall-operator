@@ -28,9 +28,7 @@ let renderResources =
                         }
                       ]
 
-          let service-name =
-                    \(service-name : Text)
-                ->  app.name ++ "-service-" ++ service-name
+          let service-name = \(service-name : Text) -> service-name
 
           let mkServicePort =
                     \(port : Port)
