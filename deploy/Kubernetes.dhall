@@ -1,8 +1,10 @@
 let Prelude = ../Prelude.dhall
 
-let Kubernetes = ../Kubernetes.dhall
+let Kubernetes =
+      https://raw.githubusercontent.com/dhall-lang/dhall-kubernetes/bbfec3d8548b605f1c9628f34029ab4a7d928839/package.dhall sha256:3ea8628b704704de295261dfc7626c15247c589c10a266f970cade262543fdda
 
-let k8s = ./kubernetes-types-union.dhall
+let k8s =
+      https://raw.githubusercontent.com/dhall-lang/dhall-kubernetes/bbfec3d8548b605f1c9628f34029ab4a7d928839/typesUnion.dhall sha256:8e8db456b218b93f8241d497e54d07214b132523fe84263e6c03496c141a8b18
 
 let Port = ../types/Port.dhall
 
