@@ -10,14 +10,89 @@ let Env = ../types/Env.dhall
 
 let service-image = "registry.fedoraproject.org/fedora:31"
 
+let spaceSep = Prelude.Text.concatSep " "
+
+let newlineSep = Prelude.Text.concatSep "\n"
+
+let getPort =
+          \(local : Bool)
+      ->  \(port : ../types/Port.dhall)
+      ->  let local-port = Natural/show port.container
+
+          in  Prelude.Optional.fold
+                Natural
+                port.host
+                Text
+                (     \(port-host : Natural)
+                  ->  "--publish ${Natural/show port-host}:${local-port}"
+                )
+                (if local then "--publish ${local-port}:${local-port}" else "")
+
+let getPorts
+    : forall (local : Bool) -> forall (service : Service) -> List Text
+    =     \(local : Bool)
+      ->  \(service : Service)
+      ->  Prelude.Optional.fold
+            (List ../types/Port.dhall)
+            service.ports
+            (List Text)
+            (     \(some : List ../types/Port.dhall)
+              ->  Prelude.List.map ../types/Port.dhall Text (getPort local) some
+            )
+            ([] : List Text)
+
+let serviceCommand =
+          \(app : ../types/Application.dhall)
+      ->  \(action : List Text)
+      ->  \(rm : Bool)
+      ->  \(local : Bool)
+      ->  \(service : Service)
+      ->  \(container : ../types/Container.dhall)
+      ->  \(detach : Bool)
+      ->  let setVolume =
+                Prelude.List.map
+                  Volume
+                  Text
+                  (     \(volume : Volume)
+                    ->  "--volume=${app.name}-${volume.name}:${volume.dir}"
+                  )
+
+          let setEnv =
+                Prelude.List.map
+                  Env
+                  Text
+                  (\(env : Env) -> "--env=${env.mapKey}='${env.mapValue}'")
+
+          let toggle =
+                    \(toggle : Bool)
+                ->  \(value : Text)
+                ->  Prelude.Bool.fold
+                      toggle
+                      (List Text)
+                      [ value ]
+                      ([] : List Text)
+
+          in  spaceSep
+                (   [ "podman" ]
+                  # action
+                  # [ "--name", "${app.name}-${service.name}" ]
+                  # toggle service.privileged "--privileged"
+                  # toggle detach "--detach"
+                  # setVolume (app.volumes service.type)
+                  # setEnv (app.environs service.type)
+                  # toggle local "--network=host"
+                  # toggle rm "--rm"
+                  # [ container.image ]
+                  # ../functions/getCommandQuoted.dhall container
+                )
+
 let renderCommands
     : forall (app : ../types/Application.dhall) -> Text
     =     \(app : ../types/Application.dhall)
       ->  let pod-name = "${app.name}"
 
-          let spaceSep = Prelude.Text.concatSep " "
-
-          let newlineSep = Prelude.Text.concatSep "\n"
+          let serviceCommandRun =
+                serviceCommand app [ "run", "--pod", app.name ] True False
 
           let writeConf =
                     \(volume : Volume)
@@ -45,20 +120,6 @@ let renderCommands
                     \(volumes : List Volume)
                 ->  newlineSep (Prelude.List.map Volume Text writeConf volumes)
 
-          let setEnv =
-                Prelude.List.map
-                  Env
-                  Text
-                  (\(env : Env) -> "--env=${env.mapKey}='${env.mapValue}'")
-
-          let setVolume =
-                Prelude.List.map
-                  Volume
-                  Text
-                  (     \(volume : Volume)
-                    ->  "--volume=${app.name}-${volume.name}:${volume.dir}"
-                  )
-
           let setHosts =
                 Prelude.List.map
                   Service
@@ -67,42 +128,8 @@ let renderCommands
                     ->  "--add-host=${service.name}:127.0.0.1"
                   )
 
-          let serviceCommandRun =
-                    \(service : ../types/Service.dhall)
-                ->  \(container : ../types/Container.dhall)
-                ->  \(detach : Bool)
-                ->  let isPrivileged =
-                          Prelude.Bool.fold
-                            service.privileged
-                            (List Text)
-                            [ "--privileged" ]
-                            ([] : List Text)
-
-                    let isDetached =
-                          Prelude.Bool.fold
-                            detach
-                            (List Text)
-                            [ "--detach" ]
-                            ([] : List Text)
-
-                    in  spaceSep
-                          (   [ "podman"
-                              , "run"
-                              , "--pod"
-                              , "${app.name}"
-                              , "--name"
-                              , "${app.name}-${service.name}"
-                              ]
-                            # isPrivileged
-                            # isDetached
-                            # setVolume (app.volumes service.type)
-                            # setEnv (app.environs service.type)
-                            # [ "--rm", container.image ]
-                            # ../functions/getCommandQuoted.dhall container
-                          )
-
           let serviceCommandsInit =
-                    \(service : ../types/Service.dhall)
+                    \(service : Service)
                 ->  Prelude.List.map
                       ../types/Container.dhall
                       Text
@@ -113,50 +140,22 @@ let renderCommands
                           service.init-containers
                       )
 
-          let serviceCommand =
-                    \(service : ../types/Service.dhall)
+          let serviceCommands =
+                    \(service : Service)
                 ->  newlineSep
                       (   serviceCommandsInit service
                         # [ serviceCommandRun service service.container True ]
                       )
 
-          let setPort =
-                    \(port : ../types/Port.dhall)
-                ->  Prelude.Optional.fold
-                      Natural
-                      port.host
-                      Text
-                      (     \(port-host : Natural)
-                        ->      "--publish ${Natural/show port-host}:"
-                            ++  "${Natural/show port.container}"
-                      )
-                      ""
-
-          let getPort
-              : forall (service : ../types/Service.dhall) -> List Text
-              =     \(service : ../types/Service.dhall)
-                ->  Prelude.Optional.fold
-                      (List ../types/Port.dhall)
-                      service.ports
-                      (List Text)
-                      (     \(some : List ../types/Port.dhall)
-                        ->  Prelude.List.map
-                              ../types/Port.dhall
-                              Text
-                              setPort
-                              some
-                      )
-                      ([] : List Text)
-
-          let getPorts =
+          let getAllPorts =
                 Prelude.Text.concatSep
                   " "
                   ( Prelude.List.fold
                       (List Text)
                       ( Prelude.List.map
-                          ../types/Service.dhall
+                          Service
                           (List Text)
-                          getPort
+                          (getPorts False)
                           app.services
                       )
                       (List Text)
@@ -169,7 +168,7 @@ let renderCommands
 
           let init =
                 [ "#!/bin/bash -ex"
-                , "podman pod create --name ${app.name} " ++ getPorts
+                , "podman pod create --name ${app.name} " ++ getAllPorts
                 ]
 
           let {- podman pod doesn't seems to set dns, create a first pod for that...
@@ -193,7 +192,7 @@ let renderCommands
           let volumesCommand = [ writeVolumes (app.volumes ServiceType._All) ]
 
           let servicesCommand =
-                Prelude.List.map Service Text serviceCommand app.services
+                Prelude.List.map Service Text serviceCommands app.services
 
           let start =
                 [ "podman pod start ${app.name}"
@@ -214,4 +213,4 @@ let renderCommands
                   # [ "" ]
                 )
 
-in  renderCommands
+in  { RenderCommands = renderCommands, RenderCommand = serviceCommand }
