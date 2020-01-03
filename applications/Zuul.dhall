@@ -60,13 +60,14 @@ let {- the list of zuul services -} control-plane-services =
                     Some
                       [ "sh"
                       , "-c"
-                      ,     "cd /config/config ;"
+                      ,     "mkdir -p /git/config; cp /config/* /git/config;"
+                        ++  "cd /git/config ;"
                         ++  "git config --global user.email zuul@localhost ;"
                         ++  "git config --global user.name Zuul ;"
                         ++  "git init . ;"
                         ++  "git add -A . ;"
                         ++  "git commit -m init ;"
-                        ++  "git daemon --export-all --reuseaddr --verbose --base-path=/config/ /config/"
+                        ++  "git daemon --export-all --reuseaddr --verbose --base-path=/git/ /git/"
                       ]
                 }
             }
@@ -268,10 +269,7 @@ let {- the service confs -} control-plane-config =
                 }
 
           let config-repo =
-                { name = "config"
-                , dir = "/config/config"
-                , files = zuul-config-files
-                }
+                { name = "config", dir = "/config", files = zuul-config-files }
 
           let empty = [] : List ../types/Volume.dhall
 
