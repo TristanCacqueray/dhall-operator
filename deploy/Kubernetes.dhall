@@ -160,6 +160,15 @@ let renderResources =
                     , env = mkContainerEnv (app.environs service.type)
                     , volumeMounts =
                         mkContainerVolume (app.volumes service.type)
+                    , securityContext =
+                              if service.privileged
+
+                        then  Some
+                                Kubernetes.SecurityContext::{
+                                , privileged = Some True
+                                }
+
+                        else  None Kubernetes.SecurityContext.Type
                     }
 
           let mkServiceMetadata =
