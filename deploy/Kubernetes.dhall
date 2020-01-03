@@ -105,7 +105,6 @@ let renderResources =
                               Kubernetes.SecretVolumeSource::{
                               , secretName =
                                   Some (app.name ++ "-secret-" ++ volume.name)
-                              , defaultMode = Some 256
                               }
                         }
                   )
