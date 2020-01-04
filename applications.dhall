@@ -1,1 +1,1 @@
-{ Zuul = ./applications/Zuul.dhall }
+{ Demo = ./applications/Demo.dhall, Zuul = ./applications/Zuul.dhall }
