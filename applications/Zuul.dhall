@@ -184,7 +184,7 @@ let {- the service confs -} control-plane-config =
       ->  \(kube-config : Text)
       ->  \(context-name : Text)
       ->  let zuul-conf =
-                { name = "etc_zuul"
+                { name = "etczuul"
                 , dir = "/etc/zuul"
                 , files =
                     [ { path = "zuul.conf"
@@ -250,7 +250,7 @@ let {- the service confs -} control-plane-config =
                 ''
 
           let nodepool-conf =
-                { name = "etc_nodepool"
+                { name = "etcnodepool"
                 , dir = "/etc/nodepool"
                 , files =
                     [ { path = "nodepool.yaml"
