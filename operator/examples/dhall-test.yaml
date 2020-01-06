@@ -1,0 +1,8 @@
+apiVersion: softwarefactory-project.io/v1alpha1
+kind: Dhall
+metadata:
+  name: example-dhall
+spec:
+  expression: |
+    https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/deploy/Kubernetes.dhall
+    https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/applications/Demo.dhall

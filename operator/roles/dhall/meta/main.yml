@@ -1,0 +1,8 @@
+galaxy_info:
+  author: Software Factory Developpers
+  description: A role to apply dhall expression
+  company: Red Hat
+  license: Apache
+  min_ansible_version: 2.6
+  galaxy_tags: []
+dependencies: []

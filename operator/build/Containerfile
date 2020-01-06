@@ -1,0 +1,30 @@
+# To be build from the root of the dhall-operator repository
+# Build directly in crio storage with:
+#   sudo ~/.local/bin/operator-sdk build --image-build-args "--root /var/lib/silverkube/storage --storage-driver vfs" --image-builder \
+#      podman quay.io/softwarefactory-project.io/dhall-operator:0.0.1
+
+FROM quay.io/operator-framework/ansible-operator:v0.13.0
+
+# Install dhall-to-json
+USER root
+RUN dnf install -y python3 bzip2 tar
+RUN python3 -c 'import pathlib, urllib.request;from hashlib import sha256;fail = lambda s: (print(s), exit(1));u, h = "https://github.com/dhall-lang/dhall-haskell/releases/download/1.28.0/dhall-json-1.6.0-x86_64-linux.tar.bz2", "b9917603fa58295f211dde384c073f8482343d445ad9bfab8919ae2eaca6bda7";output = pathlib.Path("/usr/local/bin").expanduser();local = pathlib.Path("~/.cache/podenv/buildStore").expanduser() / h;notLocal = not local.exists() or sha256(local.read_bytes()).hexdigest() != h;print(u + ": downloading") if notLocal else True;req = urllib.request.urlopen(u) if notLocal else True;data = req.read() if notLocal else local.read_bytes();digest = sha256(data).hexdigest();fail(u + ": expected " + h + "got " + digest) if digest != h else True;local.parent.mkdir(parents=True, exist_ok=True);local.write_bytes(data) if notLocal else True;print(u + ": extracted to " + str(output));from subprocess import Popen, PIPE;p = Popen("tar -xf - --strip-components=2 -j --mode='a+x' -C".split() + [str(output)], stdin=PIPE);p.communicate(data);fail(u + ": failed to extract") if p.wait() else True'
+USER 1001
+
+# Install caches
+RUN mkdir -p ${HOME}/.cache ${HOME}/dhall
+RUN ln -s dhall ${HOME}/.cache/dhall-haskell
+
+COPY package.dhall ${HOME}/dhall/package.dhall
+COPY Prelude.dhall ${HOME}/dhall/Prelude.dhall
+COPY applications/ ${HOME}/dhall/applications/
+COPY deploy/ ${HOME}/dhall/deploy/
+COPY functions/ ${HOME}/dhall/functions/
+COPY schemas/ ${HOME}/dhall/schemas/
+COPY types/ ${HOME}/dhall/types/
+
+COPY operator/build/dhall-cache/ ${HOME}/.cache/dhall/
+
+COPY operator/watches.yaml ${HOME}/watches.yaml
+
+COPY operator/roles/ ${HOME}/roles/
