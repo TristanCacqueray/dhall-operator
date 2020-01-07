@@ -128,19 +128,7 @@ in  { Input = Input
                       [ Services.InternalConfig
                       , Services.ZooKeeper
                       , Services.Postgres
-                      ,     Services.Scheduler
-                        //  { init-containers =
-                                Some
-                                  [ { image = Helpers.Images.Base
-                                    , command =
-                                        Some
-                                          ( ../../functions/waitFor.dhall
-                                              "db"
-                                              5432
-                                          )
-                                    }
-                                  ]
-                            }
+                      , Helpers.waitForDb Services.Scheduler
                       , Services.Executor
                       ,     Services.Web
                         //  { ports =

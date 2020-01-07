@@ -125,8 +125,26 @@ let Services =
           }
       }
 
+let waitFor =
+          \(endpoint : { host : Text, port : Natural })
+      ->  \(service : Service.Type)
+      ->      service
+          //  { init-containers =
+                  Some
+                    [ { image = zuul-base
+                      , command =
+                          Some
+                            ( ../../functions/waitFor.dhall
+                                endpoint.host
+                                endpoint.port
+                            )
+                      }
+                    ]
+              }
+
 in  { Services = Services
     , Images = { Base = zuul-base }
+    , waitForDb = waitFor { host = "db", port = 5432 }
     , DefaultEnv =
             \(db-password : Text)
         ->  let db-env =
