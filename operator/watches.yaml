@@ -3,3 +3,8 @@
   group: softwarefactory-project.io
   kind: Dhall
   role: /opt/ansible/roles/dhall
+
+- version: v1alpha1
+  group: softwarefactory-project.io
+  kind: Zuul
+  role: /opt/ansible/roles/zuul

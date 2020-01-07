@@ -1,11 +1,11 @@
 ---
-# tasks file for dhall
 - name: Convert expression to kubernetes objects
-  dhall:
+  dhall_to_json:
     expression: "{{ expression }}"
   register: _dhall_output
 
 - name: Apply objects
   k8s:
+    state: "{{ state }}"
     namespace: "{{ namespace }}"
     definition: "{{ _dhall_output.result }}"

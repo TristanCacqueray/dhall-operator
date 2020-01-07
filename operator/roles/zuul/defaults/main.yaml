@@ -1,0 +1,3 @@
+template_params: "{{ params | default({}) }}"
+name: "{{ meta.name | default('zuul') }}"
+kubernetes_deploy_path: "/opt/ansible/dhall/deploy/Kubernetes.dhall"

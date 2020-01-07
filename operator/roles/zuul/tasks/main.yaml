@@ -1,0 +1,13 @@
+- name: Convert spec to template input
+  json_to_dhall:
+    template: "{{ template }}"
+    params: "{{ template_params }}"
+    name: "{{ name }}"
+  register: _dhall
+
+- include_role:
+    name: dhall
+  vars:
+    expression: |
+      {{ kubernetes_deploy_path }}
+      (({{ template }}).Application {{ _dhall.result }})
