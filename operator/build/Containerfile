@@ -1,7 +1,7 @@
 # To be build from the root of the dhall-operator repository
 # Build directly in crio storage with:
 #   sudo ~/.local/bin/operator-sdk build --image-build-args "--root /var/lib/silverkube/storage --storage-driver vfs" --image-builder \
-#      podman quay.io/softwarefactory-project.io/dhall-operator:0.0.1
+#      podman quay.io/software-factory/dhall-operator:0.0.1
 
 FROM quay.io/operator-framework/ansible-operator:v0.13.0
 
