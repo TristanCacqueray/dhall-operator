@@ -157,6 +157,7 @@ let renderResources =
                 ->  Kubernetes.Container::{
                     , name = service.name
                     , image = Some container.image
+                    , imagePullPolicy = Some "IfNotPresent"
                     , ports = mkContainerPorts service
                     , args = ../functions/getCommand.dhall container
                     , env = mkContainerEnv (app.environs service.type)
