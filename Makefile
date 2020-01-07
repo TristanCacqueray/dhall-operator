@@ -1,18 +1,16 @@
-data:
-	mkdir -p applications/data/
-	[ -f applications/data/id_rsa ] || ssh-keygen -f applications/data/id_rsa -N ''
+ZUUL_TEST := ((./applications/zuul/Test.dhall).Application { ssh_key = (./applications/data/id_rsa as Text), name = \"uzuul\", port = Some 9090, kubeconfig = None Text, kubecontext = None Text })
 
 demo:
 	@(dhall-to-yaml --omit-empty --explain <<< 'let lib = ./package.dhall in lib.Deploy.Kubernetes lib.Applications.Demo')
 
 ansible:
-	@(dhall-to-yaml --omit-empty --explain <<< '(./deploy/Ansible.dhall).Localhost ((./applications/Zuul.dhall).LocalCluster (./applications/data/id_rsa as Text) "test01")')
+	@dhall-to-yaml --omit-empty --explain <<< "(./deploy/Ansible.dhall).Localhost $(ZUUL_TEST)"
 
 ansibles:
-	@(dhall-to-yaml --omit-empty --explain <<< '(./deploy/Ansible.dhall).Distributed ((./applications/Zuul.dhall).LocalCluster  (./applications/data/id_rsa as Text) "test01")')
+	@dhall-to-yaml --omit-empty --explain <<< "(./deploy/Ansible.dhall).Distributed $(ZUUL_TEST)"
 
 podman:
-	@(dhall text --explain <<< '(./deploy/Podman.dhall).RenderCommands ((./applications/Zuul.dhall).LocalCluster  (./applications/data/id_rsa as Text) "test01")')
+	@dhall text --explain                 <<< "(./deploy/Podman.dhall).RenderCommands $(ZUUL_TEST)"
 
 k8s:
-	@(dhall-to-yaml --omit-empty --explain <<< 'let lib = ./package.dhall in lib.Deploy.Kubernetes (lib.Applications.Zuul.LocalCluster  (./applications/data/id_rsa as Text) "test01")')
+	@dhall-to-yaml --omit-empty --explain <<< "./deploy/Kubernetes.dhall $(ZUUL_TEST)"
