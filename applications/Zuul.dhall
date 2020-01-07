@@ -295,7 +295,8 @@ let {- the service confs -} control-plane-config =
 
 let {- An example cluster that just runs a job every minute...
     -} LocalCluster =
-          \(name : Text)
+          \(ssh-key : Text)
+      ->  \(name : Text)
       ->  let db-password = "secret"
 
           let port = 9000
@@ -322,8 +323,6 @@ let {- An example cluster that just runs a job every minute...
                 ''
 
           let default-context = "/test-cluster/"
-
-          let executor-key = ./data/id_rsa as Text
 
           let zuul-config =
                 [ { path = "zuul.yaml"
@@ -372,7 +371,7 @@ let {- An example cluster that just runs a job every minute...
                 , volumes =
                     control-plane-config
                       db-password
-                      executor-key
+                      ssh-key
                       zuul-config
                       kube-config
                       default-context
