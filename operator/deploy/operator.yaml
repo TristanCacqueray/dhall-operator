@@ -122,14 +122,14 @@ spec:
           - /usr/local/bin/ao-logs
           - /tmp/ansible-operator/runner
           - stdout
-          image: "quay.io/softwarefactory-project.io/dhall-operator:0.0.1"
+          image: "quay.io/software-factory/dhall-operator:0.0.1"
           imagePullPolicy: "IfNotPresent"
           volumeMounts:
           - mountPath: /tmp/ansible-operator/runner
             name: runner
             readOnly: true
         - name: operator
-          image: "quay.io/softwarefactory-project.io/dhall-operator:0.0.1"
+          image: "quay.io/software-factory/dhall-operator:0.0.1"
           imagePullPolicy: "IfNotPresent"
           volumeMounts:
           - mountPath: /tmp/ansible-operator/runner
