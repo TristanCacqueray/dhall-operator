@@ -23,7 +23,6 @@ COPY deploy/ ${HOME}/dhall/deploy/
 COPY functions/ ${HOME}/dhall/functions/
 COPY schemas/ ${HOME}/dhall/schemas/
 COPY types/ ${HOME}/dhall/types/
-COPY defaults/ ${HOME}/dhall/defaults/
 
 COPY operator/build/dhall-cache/ ${HOME}/.cache/dhall/
 
