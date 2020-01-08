@@ -7,5 +7,8 @@
     , volumes =
             \(serviceType : ../types/ServiceType.dhall)
         ->  [] : List ../types/Volume.dhall
+    , secrets =
+            \(serviceType : ../types/ServiceType.dhall)
+        ->  [] : List ../types/Volume.dhall
     }
 }

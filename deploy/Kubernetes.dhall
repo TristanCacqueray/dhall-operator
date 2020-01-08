@@ -111,6 +111,21 @@ let renderResources =
                         }
                   )
 
+          let mkSecretsVolume =
+                Prelude.List.map
+                  ../types/Volume.dhall
+                  Kubernetes.Volume.Type
+                  (     \(volume : ../types/Volume.dhall)
+                    ->  Kubernetes.Volume::{
+                        , name = volume.name
+                        , secret =
+                            Some
+                              Kubernetes.SecretVolumeSource::{
+                              , secretName = Some volume.name
+                              }
+                        }
+                  )
+
           let mkContainerVolume =
                 Prelude.List.map
                   ../types/Volume.dhall
@@ -162,7 +177,8 @@ let renderResources =
                     , args = ../functions/getCommand.dhall container
                     , env = mkContainerEnv (app.environs service.type)
                     , volumeMounts =
-                        mkContainerVolume (app.volumes service.type)
+                        mkContainerVolume
+                          (app.volumes service.type # app.secrets service.type)
                     , securityContext =
                               if service.privileged
 
@@ -193,7 +209,9 @@ let renderResources =
                         = { index : Natural, value : ../types/Container.dhall }
 
                     in  Kubernetes.PodSpec::{
-                        , volumes = mkServiceVolume (app.volumes service.type)
+                        , volumes =
+                              mkServiceVolume (app.volumes service.type)
+                            # mkSecretsVolume (app.secrets service.type)
                         , containers =
                             [ mkServiceContainer service service.container ]
                         , initContainers =
