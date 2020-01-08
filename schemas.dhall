@@ -1,1 +1,0 @@
-{ Service = ./schemas/Service.dhall }

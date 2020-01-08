@@ -1,4 +1,8 @@
-{ Schemas = ./schemas.dhall
-, Deploy = ./deploy.dhall
-, Applications = ./applications.dhall
+{ Schemas = { Service = ./schemas/Service.dhall }
+, Deploy =
+    { Ansible = ./deploy/Ansible.dhall
+    , Kubernetes = ./deploy/Kubernetes.dhall
+    , Podman = ./deploy/Podman.dhall
+    }
+, Applications = { Demo = ./applications/Demo.dhall }
 }
