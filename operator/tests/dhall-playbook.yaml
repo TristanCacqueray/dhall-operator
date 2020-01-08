@@ -1,0 +1,17 @@
+# Test the dhall role
+# cleanup using: ansible-playbook tests/dhall-playbook.yaml -e k8s_state=absent
+- name: Test dhall role
+  hosts: localhost
+  gather_facts: no
+  vars:
+    expression: |
+      https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/deploy/Kubernetes.dhall
+      https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/applications/Demo.dhall
+  pre_tasks:
+    - command: kubectl get pods
+  roles:
+    - dhall
+  post_tasks:
+    - command: kubectl get pods
+    - debug:
+        msg: 'Cleanup by running: ansible-playbook tests/dhall-playbook.yaml -e k8s_state=absent'

@@ -8,4 +8,6 @@
   k8s:
     state: "{{ state }}"
     namespace: "{{ namespace }}"
-    definition: "{{ _dhall_output.result }}"
+    definition: "{{ item }}"
+    apply: yes
+  loop: "{{ _dhall_output.result['items'] }}"
