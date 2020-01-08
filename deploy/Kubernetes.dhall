@@ -249,7 +249,7 @@ let renderResources =
                         , spec =
                             Some
                               Kubernetes.DeploymentSpec::{
-                              , replicas = Some 1
+                              , replicas = Some service.count
                               , selector = mkServiceSelector labels
                               , template = mkServicePodTemplate service labels
                               }
@@ -301,7 +301,7 @@ let renderResources =
                             Some
                               Kubernetes.StatefulSetSpec::{
                               , serviceName = service.name
-                              , replicas = Some 1
+                              , replicas = Some service.count
                               , selector = mkServiceSelector labels
                               , template = mkServicePodTemplate service labels
                               , volumeClaimTemplates =

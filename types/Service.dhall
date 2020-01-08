@@ -1,4 +1,5 @@
 { name : Text
+, count : Natural
 , type : ./ServiceType.dhall
 , privileged : Bool
 , ports : Optional (List ./Port.dhall)
