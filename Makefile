@@ -16,4 +16,4 @@ k8s:
 	@dhall-to-yaml --omit-empty --explain <<< "./deploy/Kubernetes.dhall $(ZUUL_TEST)"
 
 install:
-	kubectl apply -f operator/deploy/zuul-crd.yaml -f operator/deploy/dhall-crd.yaml -f operator/deploy/operator.yaml
+	kubectl apply -f operator/deploy/dhall-crd.yaml -f operator/deploy/operator.yaml

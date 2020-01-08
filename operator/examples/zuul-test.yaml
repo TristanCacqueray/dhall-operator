@@ -1,6 +1,0 @@
-apiVersion: softwarefactory-project.io/v1alpha1
-kind: Zuul
-metadata:
-  name: micro-zuul
-spec:
-  template: /opt/ansible/dhall/applications/zuul/Test.dhall
