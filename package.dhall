@@ -3,6 +3,7 @@
     , Service = ./schemas/Service.dhall
     , Container = ./schemas/Container.dhall
     , Port = ./schemas/Port.dhall
+    , Volume = ./schemas/Volume.dhall
     }
 , Types =
     { Env = ./types/Env.dhall
