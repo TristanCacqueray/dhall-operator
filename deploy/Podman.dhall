@@ -50,12 +50,13 @@ let serviceCommand =
       ->  \(container : ../types/Container.dhall)
       ->  \(detach : Bool)
       ->  let setVolume =
-                Prelude.List.map
-                  Volume
-                  Text
-                  (     \(volume : Volume)
-                    ->  "--volume=${app.name}-${volume.name}:${volume.dir}"
-                  )
+                    \(prefix : Text)
+                ->  Prelude.List.map
+                      Volume
+                      Text
+                      (     \(volume : Volume)
+                        ->  "--volume=${prefix}${volume.name}:${volume.dir}"
+                      )
 
           let setEnv =
                 Prelude.List.map
@@ -78,7 +79,8 @@ let serviceCommand =
                   # [ "--name", "${app.name}-${service.name}" ]
                   # toggle service.privileged "--privileged"
                   # toggle detach "--detach"
-                  # setVolume (app.volumes service.type)
+                  # setVolume "${app.name}-" (app.volumes service.type)
+                  # setVolume "" (app.secrets service.type)
                   # setEnv (app.environs service.type)
                   # toggle local "--network=host"
                   # toggle rm "--rm"
