@@ -115,6 +115,13 @@ let mkConfig =
 
           in  mkConfigDir # concatTasks mkConfigCopies
 
+let mkEnvSecretFact =
+      [ mkTask.Command
+          { name = "TODO: create fact from secret env volume content"
+          , command = "echo: NotImplemented"
+          }
+      ]
+
 let renderPlaybook
     :     forall (local : Bool)
       ->  forall (app : ../types/Application.dhall)
@@ -160,7 +167,9 @@ let renderPlaybook
                 ->  Play::{
                     , hosts = service.name
                     , tasks =
-                        mkConfig (app.volumes service.type) # mkService service
+                          mkConfig (app.volumes service.type)
+                        # mkEnvSecretFact
+                        # mkService service
                     }
 
           let mkSinglePlay =
@@ -183,6 +192,7 @@ let renderPlaybook
                             }
                         ]
                       # mkConfig (app.volumes ServiceType._All)
+                      # mkEnvSecretFact
                       # concatTasks
                           ( Prelude.List.map
                               Service

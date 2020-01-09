@@ -7,6 +7,7 @@
     }
 , Types =
     { Env = ./types/Env.dhall
+    , EnvSecret = ./types/EnvSecret.dhall
     , Service = ./types/Service.dhall
     , ServiceType = ./types/ServiceType.dhall
     , Volume = ./types/Volume.dhall

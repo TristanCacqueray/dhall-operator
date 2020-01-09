@@ -10,5 +10,8 @@
     , secrets =
             \(serviceType : ../types/ServiceType.dhall)
         ->  [] : List ../types/Volume.dhall
+    , env-secrets =
+            \(serviceType : ../types/ServiceType.dhall)
+        ->  [] : List ../types/EnvSecret.dhall
     }
 }

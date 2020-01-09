@@ -166,6 +166,25 @@ let renderResources =
                         }
                   )
 
+          let mkContainerSecretEnv =
+                Prelude.List.map
+                  ../types/EnvSecret.dhall
+                  Kubernetes.EnvVar.Type
+                  (     \(env : ../types/EnvSecret.dhall)
+                    ->  Kubernetes.EnvVar::{
+                        , name = env.name
+                        , valueFrom =
+                            Kubernetes.EnvVarSource::{
+                            , secretKeyRef =
+                                Some
+                                  Kubernetes.SecretKeySelector::{
+                                  , key = env.key
+                                  , name = Some env.secret
+                                  }
+                            }
+                        }
+                  )
+
           let mkServiceContainer =
                     \(service : ../types/Service.dhall)
                 ->  \(container : ../types/Container.dhall)
@@ -175,7 +194,9 @@ let renderResources =
                     , imagePullPolicy = Some "IfNotPresent"
                     , ports = mkContainerPorts service
                     , args = ../functions/getCommand.dhall container
-                    , env = mkContainerEnv (app.environs service.type)
+                    , env =
+                          mkContainerEnv (app.environs service.type)
+                        # mkContainerSecretEnv (app.env-secrets service.type)
                     , volumeMounts =
                         mkContainerVolume
                           (app.volumes service.type # app.secrets service.type)

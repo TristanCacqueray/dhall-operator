@@ -8,6 +8,8 @@ let ServiceType = ../types/ServiceType.dhall
 
 let Env = ../types/Env.dhall
 
+let EnvSecret = ../types/EnvSecret.dhall
+
 let service-image = "registry.fedoraproject.org/fedora:31"
 
 let spaceSep = Prelude.Text.concatSep " "
@@ -73,6 +75,21 @@ let serviceCommand =
                       [ value ]
                       ([] : List Text)
 
+          let setSecretEnv =
+                Prelude.List.map
+                  EnvSecret
+                  Text
+                  (     \(env : EnvSecret)
+                    ->  let value =
+                              Prelude.Bool.fold
+                                rm
+                                Text
+                                "\$${env.secret}_${env.key}"
+                                "{{ _${env.secret}_${env.key}.stdout }}"
+
+                        in  "\"--env=${env.name}='${value}'\""
+                  )
+
           in  spaceSep
                 (   [ "podman" ]
                   # action
@@ -82,6 +99,7 @@ let serviceCommand =
                   # setVolume "${app.name}-" (app.volumes service.type)
                   # setVolume "" (app.secrets service.type)
                   # setEnv (app.environs service.type)
+                  # setSecretEnv (app.env-secrets service.type)
                   # toggle local "--network=host"
                   # toggle rm "--rm"
                   # [ container.image ]
@@ -95,6 +113,10 @@ let renderCommands
 
           let serviceCommandRun =
                 serviceCommand app [ "run", "--pod", app.name ] True False
+
+          let volume-path =
+                    \(volume : Text)
+                ->  "\$(podman volume inspect ${volume} --format '{{.Mountpoint}}')"
 
           let writeConf =
                     \(volume : Volume)
@@ -122,6 +144,19 @@ let renderCommands
           let writeVolumes =
                     \(volumes : List Volume)
                 ->  newlineSep (Prelude.List.map Volume Text writeConf volumes)
+
+          let readSecret =
+                    \(env : EnvSecret)
+                ->  let volume-path = volume-path env.secret
+
+                    in  "${env.secret}_${env.key}=\$(cat ${volume-path}/${env.key})'"
+
+          let readEnvSecrets =
+                Prelude.List.map
+                  EnvSecret
+                  Text
+                  readSecret
+                  (app.env-secrets ServiceType._All)
 
           let setHosts =
                 Prelude.List.map
@@ -211,6 +246,7 @@ let renderCommands
                 (   init
                   # volumesCommand
                   # dnsFix
+                  # readEnvSecrets
                   # servicesCommand
                   # start
                   # [ "" ]
