@@ -112,7 +112,8 @@ let renderCommands
                               ->  ''
                                   mkdir -p $VOLPATH/$(dirname ${conf.path})
                                   cat << EOF > $VOLPATH/${conf.path}
-                                  ${conf.content}EOF
+                                  ${conf.content}
+                                  EOF
                                   ''
                             )
                             volume.files

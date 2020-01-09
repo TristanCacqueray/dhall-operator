@@ -100,7 +100,7 @@ let mkConfig =
                                         { copy =
                                             { content = file.content
                                             , dest =
-                                                    "{{ _volume_${volume.name}.stdout }}/"
+                                                    "{{ _volume_${volume.name}.stdout_lines[-1] }}/"
                                                 ++  file.path
                                             , seuser = "system_u"
                                             , serole = "object_r"
