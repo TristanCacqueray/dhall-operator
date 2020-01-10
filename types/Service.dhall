@@ -6,4 +6,5 @@
 , container : ./Container.dhall
 , init-containers : Optional (List ./Container.dhall)
 , volume-size : Optional Natural
+, data-dir : List ./Volume.dhall
 }

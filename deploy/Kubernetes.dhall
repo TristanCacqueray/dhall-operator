@@ -12,6 +12,8 @@ let Service = ../types/Service.dhall
 
 let ServiceType = ../types/ServiceType.dhall
 
+let Volume = ../types/Volume.dhall
+
 let Labels = List { mapKey : Text, mapValue : Text }
 
 let renderResources =
@@ -199,7 +201,10 @@ let renderResources =
                         # mkContainerSecretEnv (app.env-secrets service.type)
                     , volumeMounts =
                         mkContainerVolume
-                          (app.volumes service.type # app.secrets service.type)
+                          (   app.volumes service.type
+                            # app.secrets service.type
+                            # service.data-dir
+                          )
                     , securityContext =
                               if service.privileged
 
@@ -229,10 +234,25 @@ let renderResources =
                         : Type
                         = { index : Natural, value : ../types/Container.dhall }
 
+                    let mkDataVolume =
+                          Prelude.List.map
+                            Volume
+                            Kubernetes.Volume.Type
+                            (     \(data-dir : Volume)
+                              ->  Kubernetes.Volume::{
+                                  , name = data-dir.name
+                                  , emptyDir =
+                                      Kubernetes.EmptyDirVolumeSource::{
+                                      , medium = Some ""
+                                      }
+                                  }
+                            )
+
                     in  Kubernetes.PodSpec::{
                         , volumes =
                               mkServiceVolume (app.volumes service.type)
                             # mkSecretsVolume (app.secrets service.type)
+                            # mkDataVolume service.data-dir
                         , containers =
                             [ mkServiceContainer service service.container ]
                         , initContainers =
