@@ -12,7 +12,10 @@
     , ServiceType = ./types/ServiceType.dhall
     , Volume = ./types/Volume.dhall
     }
-, Functions = { waitFor = ./functions/waitFor.dhall }
+, Functions =
+    { waitFor = ./functions/waitFor.dhall
+    , getCommand = ./functions/getCommand.dhall
+    }
 , Deploy =
     { Ansible = ./deploy/Ansible.dhall
     , Kubernetes = ./deploy/Kubernetes.dhall
