@@ -109,11 +109,12 @@ let {- The main base image
                       , Podenv.Schemas.Task::{
                         , copy =
                             Some
-                              { dest = "/uid_entrypoint"
+                              { dest = "/bin/uid_entrypoint"
                               , content = ./uid_entrypoint as Text
                               }
                         }
-                      , run "chmod +x /uid_entrypoint && chmod g=u /etc/passwd"
+                      , run
+                          "rm -f /anaconda-post.log && chmod +x /bin/uid_entrypoint && chmod g=u /etc/passwd"
                       , Podenv.Schemas.Task::{
                         , command = Some "ENTRYPOINT [ \"uid_entrypoint\" ]"
                         }
