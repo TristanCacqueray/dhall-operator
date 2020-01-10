@@ -266,6 +266,12 @@ let renderResources =
                                   )
                               )
                         , automountServiceAccountToken = Some False
+                        , serviceAccountName =
+                                  if service.privileged
+
+                            then  Some app.kind
+
+                            else  None Text
                         }
 
           let mkServicePodTemplate =
