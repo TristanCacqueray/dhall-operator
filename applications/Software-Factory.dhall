@@ -105,7 +105,19 @@ let {- The main base image
             //  { container-file =
                     Hub.Functions.addTasks
                       env.container-file
-                      [ Hub.Runtimes.Centos.Update ]
+                      [ Hub.Runtimes.Centos.Update
+                      , Podenv.Schemas.Task::{
+                        , copy =
+                            Some
+                              { dest = "/uid_entrypoint"
+                              , content = ./uid_entrypoint as Text
+                              }
+                        }
+                      , run "chmod +x /uid_entrypoint && chmod g=u /etc/passwd"
+                      , Podenv.Schemas.Task::{
+                        , command = Some "ENTRYPOINT [ \"uid_entrypoint\" ]"
+                        }
+                      ]
                 }
       )
         ( Hub.Runtimes.Centos.Create.EL7
