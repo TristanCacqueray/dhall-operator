@@ -265,6 +265,7 @@ let renderResources =
                                       ([] : List ../types/Container.dhall)
                                   )
                               )
+                        , automountServiceAccountToken = Some False
                         }
 
           let mkServicePodTemplate =
