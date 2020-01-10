@@ -163,16 +163,13 @@ let Zuul =
           mkZuulService
             "scheduler"
             noPre
-            [ "http://koji.softwarefactory-project.io/kojifiles/packages/python3-psycopg2/2.5.1/4.el7/x86_64/python3-psycopg2-2.5.1-4.el7.x86_64.rpm"
-            ]
+            noExtra
             [ cmd "/usr/bin/zuul-scheduler -d" ]
       , Web =
           mkZuulService
             "web"
             noPre
-            [ "zuul-webui"
-            , "http://koji.softwarefactory-project.io/kojifiles/packages/python3-psycopg2/2.5.1/4.el7/x86_64/python3-psycopg2-2.5.1-4.el7.x86_64.rpm"
-            ]
+            [ "zuul-webui" ]
             [ run
                 (     "sed -e 's/top:51px//' -e 's/margin-top:72px//' "
                   ++  "-i /usr/share/zuul/static/css/main.*.css && "
@@ -288,7 +285,7 @@ in  { Envs = Envs
             # [ "}", "function build_containers () {" ]
             # mapEnv
                 (     \(env : Podenv.Types.Env)
-                  ->      "  buildah bud -f Containerfile.${env.name} "
+                  ->      "  buildah bud --volume ~/.cache/podenv/yum:/var/cache/yum -f Containerfile.${env.name} "
                       ++  "-t \$(echo ${getImage
                                           env.image} | sed s/localhost.//) "
                       ++  "containers/ && "
