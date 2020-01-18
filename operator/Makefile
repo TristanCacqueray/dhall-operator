@@ -15,7 +15,14 @@
 # under the License.
 #
 
-- version: v1alpha1
-  group: softwarefactory-project.io
-  kind: Dhall
-  role: /opt/ansible/roles/dhall
+build:
+	podman build -f build/Containerfile -t quay.io/software-factory/dhall-operator:0.0.2 .
+
+install:
+	kubectl apply -f deploy/crd.yaml -f deploy/rbac.yaml -f deploy/operator.yaml
+
+install-scc:
+	kubectl apply -f deploy/scc.yaml
+
+config-update:
+	@dhall to-directory-tree --output . <<< '(./conf/operator/functions/scaffoldSdk.dhall).DirectoryTree ./configuration.dhall'
