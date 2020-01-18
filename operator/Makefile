@@ -15,7 +15,7 @@
 # under the License.
 #
 
-build:
+image:
 	podman build -f build/Containerfile -t quay.io/software-factory/dhall-operator:0.0.2 .
 
 install:

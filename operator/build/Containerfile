@@ -41,7 +41,7 @@ ENV DHALL_KUBERNETES=/opt/ansible/dhall-kubernetes/package.dhall
 ENV DHALL_K8S=/opt/ansible/dhall-kubernetes/typesUnion.dhall
 
 # Copy configuration
-COPY conf/ /opt/ansible/conf/
+COPY ./ /opt/ansible/conf/
 
 # Cache dhall objects
 RUN echo 'let Prelude = ~/conf/Prelude.dhall let Kubernetes = ~/conf/Kubernetes.dhall let k8s = ~/conf/KubernetesUnion.dhall in "OK"' | \
@@ -51,5 +51,5 @@ RUN echo 'let Prelude = ~/conf/Prelude.dhall let Kubernetes = ~/conf/Kubernetes.
 
 
 # Copy ansible operator requirements
-COPY watches.yaml /opt/ansible/watches.yaml
-COPY roles /opt/ansible/roles
+COPY operator/watches.yaml /opt/ansible/watches.yaml
+COPY operator/roles /opt/ansible/roles

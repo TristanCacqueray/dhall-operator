@@ -1,2 +1,2 @@
-namespace: "{{ meta.namespace|default('default') }}"
+namespace: "{{ meta.namespace | default('default') }}"
 state: "{{ k8s_state | default('present') }}"

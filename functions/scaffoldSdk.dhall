@@ -297,7 +297,7 @@ in  { Configuration = { Type = Configuration, default = {=} }
                 , Makefile =
                     ''
                     ${header}
-                    build:
+                    image:
                     	podman build -f build/Containerfile -t ${conf.image} .
 
                     install:

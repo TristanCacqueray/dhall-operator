@@ -1,5 +1,9 @@
 # dhall-operator: abstract application deployment
 
+> This is a work in progress, integration work is being implemented in
+> https://review.opendev.org/#/q/topic:zuul-crd and
+> https://softwarefactory-project.io/r/#/q/topic:sf-crd
+
 Given an [Application](types/Application.dhall) object, a deploy function can generate deployment recipe for:
 
 * Podman (using a docker-compose style shell script)
