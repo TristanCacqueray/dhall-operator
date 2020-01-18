@@ -17,7 +17,7 @@ metadata:
 spec:
   expression: |
     https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/deploy/Kubernetes.dhall
-    https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/applications/Demo.dhall
+    https://raw.githubusercontent.com/TristanCacqueray/dhall-operator/master/examples/Demo.dhall
 ```
 
 
@@ -69,7 +69,7 @@ Application::{
 Deployed with podman:
 
 ```console
-$ dhall text <<< '(./deploy/Podman.dhall).RenderCommands ./applications/Demo.dhall'
+$ dhall text <<< '(./deploy/Podman.dhall).RenderCommands ./examples/Demo.dhall'
 #!/bin/bash -ex
 podman pod create --name demo
 
@@ -82,7 +82,7 @@ podman pod start demo
 Deployed with ansible:
 
 ```yaml
-# dhall-to-yaml <<< '(./deploy/Ansible.dhall).Localhost ./applications/Demo.dhall'
+# dhall-to-yaml <<< '(./deploy/Ansible.dhall).Localhost ./examples/Demo.dhall'
 - hosts: localhost
   tasks:
     - command: "podman create --name demo-postgres --network=host docker.io/library/postgres:12.1"
@@ -114,6 +114,7 @@ Deployed with ansible:
 Deployed with kubernetes:
 
 ```yaml
+# dhall-to-yaml --omit-empty --explain <<< './deploy/Kubernetes.dhall ./examples/Demo.dhall'
 apiVersion: v1
 items:
   - apiVersion: v1
