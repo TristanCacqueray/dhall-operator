@@ -37,8 +37,8 @@ let renderResources =
                 ->  Kubernetes.ServicePort::{
                     , name = Some port.name
                     , protocol = Some port.protocol
-                    , targetPort =
-                        Some (Kubernetes.IntOrString.String port.name)
+                    , targetPort = Some
+                        (Kubernetes.IntOrString.String port.name)
                     , port = port.container
                     }
 
@@ -47,29 +47,26 @@ let renderResources =
                 ->  let labels = service-label service.name
 
                     in  Kubernetes.Service::{
-                        , metadata =
-                            Kubernetes.ObjectMeta::{
-                            , name = service-name service.name
-                            , labels = labels
-                            }
-                        , spec =
-                            Some
-                              Kubernetes.ServiceSpec::{
-                              , type = Some "ClusterIP"
-                              , selector = labels
-                              , ports =
-                                  Prelude.List.map
-                                    Port
-                                    Kubernetes.ServicePort.Type
-                                    mkServicePort
-                                    ( Prelude.Optional.fold
-                                        (List Port)
-                                        service.ports
-                                        (List Port)
-                                        (\(some : List Port) -> some)
-                                        ([] : List Port)
-                                    )
-                              }
+                        , metadata = Kubernetes.ObjectMeta::{
+                          , name = service-name service.name
+                          , labels = labels
+                          }
+                        , spec = Some Kubernetes.ServiceSpec::{
+                          , type = Some "ClusterIP"
+                          , selector = labels
+                          , ports =
+                              Prelude.List.map
+                                Port
+                                Kubernetes.ServicePort.Type
+                                mkServicePort
+                                ( Prelude.Optional.fold
+                                    (List Port)
+                                    service.ports
+                                    (List Port)
+                                    (\(some : List Port) -> some)
+                                    ([] : List Port)
+                                )
+                          }
                         }
 
           let mkSecret =
@@ -78,10 +75,9 @@ let renderResources =
                   Kubernetes.Secret.Type
                   (     \(volume : ../types/Volume.dhall)
                     ->  Kubernetes.Secret::{
-                        , metadata =
-                            Kubernetes.ObjectMeta::{
-                            , name = app.name ++ "-secret-" ++ volume.name
-                            }
+                        , metadata = Kubernetes.ObjectMeta::{
+                          , name = app.name ++ "-secret-" ++ volume.name
+                          }
                         , stringData =
                             Prelude.List.map
                               ../types/File.dhall
@@ -102,12 +98,10 @@ let renderResources =
                   (     \(volume : ../types/Volume.dhall)
                     ->  Kubernetes.Volume::{
                         , name = volume.name
-                        , secret =
-                            Some
-                              Kubernetes.SecretVolumeSource::{
-                              , secretName =
-                                  Some (app.name ++ "-secret-" ++ volume.name)
-                              }
+                        , secret = Some Kubernetes.SecretVolumeSource::{
+                          , secretName = Some
+                              (app.name ++ "-secret-" ++ volume.name)
+                          }
                         }
                   )
 
@@ -118,11 +112,9 @@ let renderResources =
                   (     \(volume : ../types/Volume.dhall)
                     ->  Kubernetes.Volume::{
                         , name = volume.name
-                        , secret =
-                            Some
-                              Kubernetes.SecretVolumeSource::{
-                              , secretName = Some volume.name
-                              }
+                        , secret = Some Kubernetes.SecretVolumeSource::{
+                          , secretName = Some volume.name
+                          }
                         }
                   )
 
@@ -173,15 +165,12 @@ let renderResources =
                   (     \(env : ../types/EnvSecret.dhall)
                     ->  Kubernetes.EnvVar::{
                         , name = env.name
-                        , valueFrom =
-                            Kubernetes.EnvVarSource::{
-                            , secretKeyRef =
-                                Some
-                                  Kubernetes.SecretKeySelector::{
-                                  , key = env.key
-                                  , name = Some env.secret
-                                  }
+                        , valueFrom = Kubernetes.EnvVarSource::{
+                          , secretKeyRef = Some Kubernetes.SecretKeySelector::{
+                            , key = env.key
+                            , name = Some env.secret
                             }
+                          }
                         }
                   )
 
@@ -239,10 +228,9 @@ let renderResources =
                             (     \(data-dir : Volume)
                               ->  Kubernetes.Volume::{
                                   , name = data-dir.name
-                                  , emptyDir =
-                                      Kubernetes.EmptyDirVolumeSource::{
-                                      , medium = Some ""
-                                      }
+                                  , emptyDir = Kubernetes.EmptyDirVolumeSource::{
+                                    , medium = Some ""
+                                    }
                                   }
                             )
 
@@ -252,7 +240,7 @@ let renderResources =
                             # mkSecretsVolume (app.secrets service.type)
                             # mkDataVolume service.data-dir
                         , containers =
-                            [ mkServiceContainer service service.container ]
+                          [ mkServiceContainer service service.container ]
                         , initContainers =
                             Prelude.List.map
                               IndexedContainer
@@ -296,11 +284,10 @@ let renderResources =
                     \(service : Service)
                 ->  \(labels : Labels)
                 ->  Kubernetes.PodTemplateSpec::{
-                    , metadata =
-                        Kubernetes.ObjectMeta::{
-                        , name = service.name
-                        , labels = labels
-                        }
+                    , metadata = Kubernetes.ObjectMeta::{
+                      , name = service.name
+                      , labels = labels
+                      }
                     , spec = Some (mkServicePod service)
                     }
 
@@ -310,32 +297,27 @@ let renderResources =
 
                     in  Kubernetes.Deployment::{
                         , metadata = mkServiceMetadata service labels
-                        , spec =
-                            Some
-                              Kubernetes.DeploymentSpec::{
-                              , replicas = Some service.count
-                              , selector = mkServiceSelector labels
-                              , template = mkServicePodTemplate service labels
-                              }
+                        , spec = Some Kubernetes.DeploymentSpec::{
+                          , replicas = Some service.count
+                          , selector = mkServiceSelector labels
+                          , template = mkServicePodTemplate service labels
+                          }
                         }
 
           let mkServiceVolumeClaim =
                     \(service : Service)
                 ->  \(size : Natural)
                 ->  Kubernetes.PersistentVolumeClaim::{
+                    , apiVersion = ""
+                    , kind = ""
                     , metadata = mkServiceMetadata service ([] : Labels)
-                    , spec =
-                        Some
-                          Kubernetes.PersistentVolumeClaimSpec::{
-                          , accessModes = [ "ReadWriteOnce" ]
-                          , resources =
-                              Some
-                                Kubernetes.ResourceRequirements::{
-                                , requests =
-                                    toMap
-                                      { storage = Natural/show size ++ "Gi" }
-                                }
-                          }
+                    , spec = Some Kubernetes.PersistentVolumeClaimSpec::{
+                      , accessModes = [ "ReadWriteOnce" ]
+                      , resources = Some Kubernetes.ResourceRequirements::{
+                        , requests =
+                            toMap { storage = Natural/show size ++ "Gi" }
+                        }
+                      }
                     }
 
           let mkServiceVolumeClaimTemplates =
@@ -361,16 +343,14 @@ let renderResources =
 
                     in  Kubernetes.StatefulSet::{
                         , metadata = mkServiceMetadata service labels
-                        , spec =
-                            Some
-                              Kubernetes.StatefulSetSpec::{
-                              , serviceName = service.name
-                              , replicas = Some service.count
-                              , selector = mkServiceSelector labels
-                              , template = mkServicePodTemplate service labels
-                              , volumeClaimTemplates =
-                                  mkServiceVolumeClaimTemplates service
-                              }
+                        , spec = Some Kubernetes.StatefulSetSpec::{
+                          , serviceName = service.name
+                          , replicas = Some service.count
+                          , selector = mkServiceSelector labels
+                          , template = mkServicePodTemplate service labels
+                          , volumeClaimTemplates =
+                              mkServiceVolumeClaimTemplates service
+                          }
                         }
 
           let {- the list of port that have an host attribute -} ingress-ports
@@ -416,32 +396,24 @@ let renderResources =
 
                     in  Kubernetes.Ingress::{
                         , metadata = mkServiceMetadata service labels
-                        , spec =
-                            Some
-                              Kubernetes.IngressSpec::{
-                              , rules =
-                                  [ Kubernetes.IngressRule::{
-                                    , http =
-                                        Some
-                                          Kubernetes.HTTPIngressRuleValue::{
-                                          , paths =
-                                              [ Kubernetes.HTTPIngressPath::{
-                                                , backend =
-                                                    Kubernetes.IngressBackend::{
-                                                    , serviceName =
-                                                        service-name
-                                                          service.name
-                                                    , servicePort =
-                                                        Kubernetes.IntOrString.Int
-                                                          port
-                                                    }
-                                                , path = Some "/"
-                                                }
-                                              ]
-                                          }
+                        , spec = Some Kubernetes.IngressSpec::{
+                          , rules =
+                            [ Kubernetes.IngressRule::{
+                              , http = Some Kubernetes.HTTPIngressRuleValue::{
+                                , paths =
+                                  [ Kubernetes.HTTPIngressPath::{
+                                    , backend = Kubernetes.IngressBackend::{
+                                      , serviceName = service-name service.name
+                                      , servicePort =
+                                          Kubernetes.IntOrString.Int port
+                                      }
+                                    , path = Some "/"
                                     }
                                   ]
+                                }
                               }
+                            ]
+                          }
                         }
 
           let secrets = mkSecret (app.volumes ServiceType._All)

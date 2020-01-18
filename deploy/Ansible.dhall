@@ -76,8 +76,8 @@ let mkConfig =
                         in  mkTask.Shell
                               { name = "Get or create volume"
                               , register = Some "_volume_${volume.name}"
-                              , changed_when =
-                                  Some "_volume_${volume.name}.stderr"
+                              , changed_when = Some
+                                  "_volume_${volume.name}.stderr"
                               , shell =
                                       "${inspect} || ( "
                                   ++  "podman volume create ${volume-name} && ${inspect}"
