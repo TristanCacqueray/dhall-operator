@@ -12,7 +12,7 @@ build-local:
 ZUUL_TEST := ((./applications/zuul/Test.dhall).Application { ssh_key = (./applications/data/id_rsa as Text), name = \"uzuul\", port = Some 9090, kubeconfig = None Text, kubecontext = None Text })
 
 demo:
-	@(dhall-to-yaml --omit-empty --explain <<< 'let lib = ./package.dhall in lib.Deploy.Kubernetes lib.Applications.Demo')
+	@dhall-to-yaml --omit-empty --explain <<< '(./deploy/Kubernetes.dhall) ./applications/Demo.dhall'
 
 ansible:
 	@dhall-to-yaml --omit-empty --explain <<< "(./deploy/Ansible.dhall).Localhost $(ZUUL_TEST)"

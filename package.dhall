@@ -11,15 +11,10 @@
     , Service = ./types/Service.dhall
     , ServiceType = ./types/ServiceType.dhall
     , Volume = ./types/Volume.dhall
+    , File = ./types/File.dhall
     }
 , Functions =
     { waitFor = ./functions/waitFor.dhall
     , getCommand = ./functions/getCommand.dhall
     }
-, Deploy =
-    { Ansible = ./deploy/Ansible.dhall
-    , Kubernetes = ./deploy/Kubernetes.dhall
-    , Podman = ./deploy/Podman.dhall
-    }
-, Applications = { Demo = ./applications/Demo.dhall }
 }
