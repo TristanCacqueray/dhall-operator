@@ -24,5 +24,5 @@
    * https://github.com/dhall-lang/dhall-nethack/blob/master/Prelude.dhall
 -}
   env:DHALL_PRELUDE
-? https://prelude.dhall-lang.org/v12.0.0/package.dhall sha256:aea6817682359ae1939f3a15926b84ad5763c24a3740103202d2eaaea4d01f4c
-? https://prelude.dhall-lang.org/v12.0.0/package.dhall
+? https://prelude.dhall-lang.org/v13.0.0/package.dhall sha256:4aa8581954f7734d09b7b21fddbf5d8df901a44b54b4ef26ea71db92de0b1a12
+? https://prelude.dhall-lang.org/v13.0.0/package.dhall
