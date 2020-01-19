@@ -1,0 +1,19 @@
+# Goals, a generalized `make`
+# Install from https://copr.fedorainfracloud.org/coprs/rjones/goals/
+# Then Run `goals lint` or `goals image`
+
+let version = "0.0.2"
+
+function dhall-files () returning strings = @{
+     find . -name "*.dhall"
+}
+
+goal dhall-fmt (file) = {
+     dhall format --ascii < %file > %file.fmt && mv %file.fmt %file
+}
+
+goal lint () = : wrap ("dhall-fmt", dhall-files ())
+
+goal image = {
+	podman build -f operator/build/Containerfile -t quay.io/software-factory/dhall-operator:%version .
+}
